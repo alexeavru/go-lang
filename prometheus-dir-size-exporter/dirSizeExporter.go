@@ -92,6 +92,8 @@ func runMetricsServer(scanDir string, maxFolderSizeBytes int64, scanTime int, ex
 			fldScanTime.Set(float64(time.Now().Unix() - timeStartNow))
 			// Спим
 			time.Sleep(time.Duration(scanTime) * time.Second)
+			// Почистим старые значения метрик
+			fldSizeMetric.Reset()
 		}
 	}()
 
