@@ -95,14 +95,15 @@ func runMetricsServer(scanDir string, maxFolderSizeBytes int64, scanTime int, ex
 			}
 			// Подсчет времени сканирования каталога
 			fldScanTime.Set(float64(time.Now().Unix() - timeStartNow))
-			// Спим
-			time.Sleep(time.Duration(scanTime) * time.Second)
 			// Почистим старые значения метрик
 			for key, value := range m {
 				if value < count {
 					delete(m, key)
+					fldSizeMetric.DeleteLabelValues(key)
 				}
 			}
+			// Спим
+			time.Sleep(time.Duration(scanTime) * time.Second)
 		}
 	}()
 
