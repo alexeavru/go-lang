@@ -72,8 +72,8 @@ func runMetricsServer(scanDir string, maxFolderSizeBytes int64, scanTime int, ex
 
 	// Запуск в отдельном процессе сканирование каталога
 	go func() {
-		var m = make(map[string]uint64)
-		var count uint64 = 0
+		var m = make(map[string]int64)
+		var count int64 = time.Now().Unix()
 		for {
 			timeStartNow := time.Now().Unix()
 			files, err := ioutil.ReadDir(scanDir)
