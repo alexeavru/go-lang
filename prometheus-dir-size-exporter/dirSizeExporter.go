@@ -73,11 +73,9 @@ func runMetricsServer(scanDir string, maxFolderSizeBytes int64, scanTime int, ex
 	// Запуск в отдельном процессе сканирование каталога
 	go func() {
 		var m = make(map[string]int64)
-		var count int64 = time.Now().Unix()
 		for {
 			timeStartNow := time.Now().Unix()
 			files, err := ioutil.ReadDir(scanDir)
-			count++
 
 			if err != nil {
 				log.Fatal(err)
@@ -89,7 +87,7 @@ func runMetricsServer(scanDir string, maxFolderSizeBytes int64, scanTime int, ex
 					if currentFolderSize > maxFolderSizeBytes {
 						fldSizeMetric.With(prometheus.Labels{"folder_name": f.Name()}).Set(float64(currentFolderSize))
 						// Сохраняем список каталогов для последующей очистки
-						m[f.Name()] = count
+						m[f.Name()] = timeStartNow
 					}
 				}
 			}
@@ -97,7 +95,7 @@ func runMetricsServer(scanDir string, maxFolderSizeBytes int64, scanTime int, ex
 			fldScanTime.Set(float64(time.Now().Unix() - timeStartNow))
 			// Почистим старые значения метрик
 			for key, value := range m {
-				if value < count {
+				if value < timeStartNow {
 					delete(m, key)
 					fldSizeMetric.DeleteLabelValues(key)
 				}
