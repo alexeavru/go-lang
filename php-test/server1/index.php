@@ -1,9 +1,30 @@
 <?php
 
+include_once('libs/sql.php');
 
 date_default_timezone_set('Europe/Moscow');
 $dateFormat = new DateTime(); 
 $stringDate = $dateFormat->format('Y-m-d H:i:s');
+
+function getDataFromDB() {
+    global $host,$user,$password,$database;
+    // подключаемся к SQL серверу
+    $link = mysqli_connect($host, $user, $password, $database) or die("Ошибка " . mysqli_error($link));
+
+    $query = "SELECT test FROM test ORDER BY test DESC;";
+    $result = $link->query($query);
+    $table_data = '';
+    while($row = mysqli_fetch_array($result)) {
+        $table_data = $table_data . $row['test']."<br>\n";
+    }
+
+    //Закрываем соединение с БД.
+    mysqli_close($link);
+    return $table_data;
+}
+
+// Выборка из БД
+$table_data = getDataFromDB();
 
 ?>
 
@@ -42,6 +63,11 @@ $stringDate = $dateFormat->format('Y-m-d H:i:s');
                 <button onclick="clickMe()"> Update </button>
 
             </div>
+            <div class="row">
+
+                <h3><div id="table"><?= $table_data ?></div></h3>
+
+            </div>
 
         </div>
 
@@ -50,8 +76,12 @@ $stringDate = $dateFormat->format('Y-m-d H:i:s');
     <script>
 
         function clickMe(){
-            $.ajax({url:"echo.php", success:function(result){
-                $("#message").text(result);}
+            $.ajax({url:"echo.php", 
+                success: function(result){
+                    var obj = jQuery.parseJSON(result);
+                    $("#message").html(obj.date);
+                    $("#table").html(obj.table);
+                }
             })
         } 
 
